@@ -4,3 +4,33 @@ To enable them in other operations, rebuild TensorFlow with the appropriate comp
 2026-05-10 02:22:04.250458: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer.so.7'; dlerror: libnvinfer.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/nvidia/lib:/usr/local/nvidia/lib64
 2026-05-10 02:22:04.250536: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer_plugin.so.7'; dlerror: libnvinfer_plugin.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/nvidia/lib:/usr/local/nvidia/lib64
 2026-05-10 02:22:04.250541: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Cannot dlopen some TensorRT libraries. If you would like to use Nvidia GPU with TensorRT, please make sure the missing libraries mentioned above are installed properly.
+/usr/local/lib/python3.8/dist-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+/usr/local/lib/python3.8/dist-packages/transformers/models/segformer/image_processing_segformer.py:99: FutureWarning: The `reduce_labels` parameter is deprecated and will be removed in a future version. Please use `do_reduce_labels` instead.
+  warnings.warn(
+Collecting unique CAM_FRONT images from /root/IntentFormer/nuscenes/data/nuscenes_ped_intent_seq3_v2.pkl ...
+  7725 unique sample_tokens
+  7725 pending (skipping 0 already cached)
+Loading SegFormer nvidia/segformer-b0-finetuned-ade-512-512 on cuda:0 ...
+  16/7725 done  (4.8s elapsed, 3.3 img/s, ETA 2330s)
+  416/7725 done  (76.1s elapsed, 5.5 img/s, ETA 1337s)
+  816/7725 done  (145.9s elapsed, 5.6 img/s, ETA 1235s)
+  1216/7725 done  (217.2s elapsed, 5.6 img/s, ETA 1163s)
+  1616/7725 done  (281.1s elapsed, 5.7 img/s, ETA 1063s)
+  2016/7725 done  (359.5s elapsed, 5.6 img/s, ETA 1018s)
+  2416/7725 done  (431.1s elapsed, 5.6 img/s, ETA 947s)
+  2816/7725 done  (513.8s elapsed, 5.5 img/s, ETA 896s)
+  3216/7725 done  (608.5s elapsed, 5.3 img/s, ETA 853s)
+  3616/7725 done  (689.6s elapsed, 5.2 img/s, ETA 784s)
+  4016/7725 done  (770.1s elapsed, 5.2 img/s, ETA 711s)
+  4416/7725 done  (843.5s elapsed, 5.2 img/s, ETA 632s)
+  4816/7725 done  (918.7s elapsed, 5.2 img/s, ETA 555s)
+  5216/7725 done  (996.0s elapsed, 5.2 img/s, ETA 479s)
+  5616/7725 done  (1066.0s elapsed, 5.3 img/s, ETA 400s)
+  6016/7725 done  (1133.9s elapsed, 5.3 img/s, ETA 322s)
+  6416/7725 done  (1199.1s elapsed, 5.4 img/s, ETA 245s)
+  6816/7725 done  (1265.9s elapsed, 5.4 img/s, ETA 169s)
+  7216/7725 done  (1330.4s elapsed, 5.4 img/s, ETA 94s)
+  7616/7725 done  (1396.2s elapsed, 5.5 img/s, ETA 20s)
+  7725/7725 done  (1414.0s elapsed, 5.5 img/s, ETA 0s)
+Done. Wrote 7725 PNGs to /mnt/storage/IntentFormer/seg_cache.

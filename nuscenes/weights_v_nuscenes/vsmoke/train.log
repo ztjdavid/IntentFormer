@@ -1,0 +1,16 @@
+==== train.py @ 2026-05-10 02:54:53 ====
+args: {'index': 'data/nuscenes_ped_intent_seq3_v2.pkl', 'epochs': 1, 'batch_size': 4, 'lr': 0.0001, 'weight_decay': 1e-05, 'version': 'smoke', 'device': 'cuda:0', 'train_limit': 200, 'val_limit': 200, 'shuffle': True, 'no_seg': False, 'seed': 42, 'weights_out': '/root/IntentFormer/nuscenes/weights_v_nuscenes'}
+Loading seq index data/nuscenes_ped_intent_seq3_v2.pkl ...
+  train: 13433  val: 3660
+  meta: {'k': 3, 'look_ahead': 4, 'min_bbox': 20, 'nusc_version': 'v1.0-trainval', 'drop_reasons': {'insufficient_history': 22842, 'intent_undefined': 307519, 'no_annotation_in_window': 12388, 'not_a_pedestrian': 76235, 'non_pedestrian_intent': 8150, 'bbox_too_small_in_window': 3371, 'no_sensor_return_in_window': 7301, 'not_in_cam_front_in_window': 537}, 'n_train_scenes': 321, 'n_val_scenes': 150, 'source_pkl': '/mnt/storage/EfficientPIE/nuscenes_infos_temporal_train.pkl', 'source_json': '/mnt/nuscenes/nuScenes/unified_map_v3/all_scenes_compact_new.json', 'seg_cache_dir': '/mnt/storage/IntentFormer/seg_cache'}
+after limits: train=200 val=200
+  train positives: 44/200 (22.0%)
+  val   positives: 53/200 (26.5%)
+steps/epoch: train=50 val=50
+Building model ...
+params: 5,804,982
+Starting fit ...
+
+Epoch 1: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vsmoke/cp_01.h5
+50/50 - 15s - loss: 3.2930 - rgb_o_loss: 0.6446 - seg_o_loss: 0.6348 - traj_o_loss: 0.6766 - rgb_o_accuracy: 0.6750 - seg_o_accuracy: 0.7250 - traj_o_accuracy: 0.7000 - val_loss: 3.0530 - val_rgb_o_loss: 0.6562 - val_seg_o_loss: 0.5670 - val_traj_o_loss: 0.5821 - val_rgb_o_accuracy: 0.7400 - val_seg_o_accuracy: 0.7400 - val_traj_o_accuracy: 0.7350 - lr: 1.0000e-04 - 15s/epoch - 291ms/step
+Done. Total fit wall-time: 0.3 min
