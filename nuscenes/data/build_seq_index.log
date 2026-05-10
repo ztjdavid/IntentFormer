@@ -1,0 +1,22 @@
+Loading nuScenes (v1.0-trainval) from /mnt/nuscenes/nuScenes ...
+  850 scenes loaded
+Reading train scene_tokens from /mnt/storage/EfficientPIE/nuscenes_infos_temporal_train.pkl ...
+  321 unique scene_tokens in train pkl
+  official val: 150 scenes
+Loading intent JSON from /mnt/nuscenes/nuScenes/unified_map_v3/all_scenes_compact_new.json ...
+  850 scenes in JSON
+  100/850 scenes  train=1551  val=1068  (2.4s)
+  150/850 scenes  train=1887  val=1068  (2.8s)
+  450/850 scenes  train=8148  val=2535  (9.8s)
+  550/850 scenes  train=9526  val=2581  (11.2s)
+  600/850 scenes  train=10838  val=2618  (12.4s)
+  650/850 scenes  train=11097  val=2824  (12.9s)
+  700/850 scenes  train=11990  val=2886  (13.8s)
+  800/850 scenes  train=13076  val=3646  (15.5s)
+  850/850 scenes  train=13433  val=3660  (15.9s)
+
+Done. Skipped 379 scenes (not train pkl, not val).
+  train: 13433 records, label_dist={0: 9777, 1: 3656}, intent7={0: 3098, 2: 3656, 1: 6679}
+  val:   3660 records, label_dist={0: 2867, 1: 793}, intent7={1: 1862, 2: 793, 0: 1005}
+  drop reasons: {'insufficient_history': 22842, 'intent_undefined': 307519, 'no_annotation_in_window': 12388, 'not_a_pedestrian': 76235, 'non_pedestrian_intent': 8150, 'bbox_too_small_in_window': 3371, 'no_sensor_return_in_window': 7301, 'not_in_cam_front_in_window': 537}
+wrote -> /root/IntentFormer/nuscenes/data/nuscenes_ped_intent_seq3_v2.pkl
