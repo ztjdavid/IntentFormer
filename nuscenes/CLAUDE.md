@@ -77,17 +77,17 @@ Our seq3 filter (require k=3 frames visible) drops ~30% (train) and ~36% (val).
 | [verify.py](verify.py) | 7-check verification suite. |
 | [smoke.sh](smoke.sh) | 1-epoch, 200/200 records smoke wrapper. |
 
-## Verification (7 checks)
+## Verification (7 checks — all PASS)
 
 | # | Check | Result |
 |---|---|---|
 | 1 | Index meta (`k=3`, `look_ahead=4`, `seg_cache_dir`, `source_pkl`, `source_json`) | PASS |
 | 2 | `intent_label()` property test (134 953 random calls vs EfficientPIE source) | PASS — 0 mismatches |
 | 3 | End-to-end label provenance (16 random pkl records vs raw JSON) | PASS — 0 mismatches |
-| 4 | Train/eval loader agreement (record counts) | PASS |
+| 4 | Train/eval loader agreement (record counts) | PASS — 13 433 / 3 660 |
 | 5 | Transform agreement (val/train deterministic-pipeline equality, no aug) | PASS |
-| 6 | Metrics-from-CSV reproducibility | _filled in after eval CSV is dumped_ |
-| 7 | Seg-cache coverage (every needed `sample_token` has a cached PNG) | _filled in after precompute completes_ |
+| 6 | Metrics-from-CSV reproducibility | PASS — CSV AUC=0.7782 matches `eval.py` to all 4 digits |
+| 7 | Seg-cache coverage (every needed `sample_token` has a cached PNG) | PASS — 7 725 / 7 725 needed cached |
 
 Run: `python3 verify.py [--csv results/intentformer_preds_vfuture_intent_val.csv]`.
 
@@ -136,13 +136,63 @@ python3 nuscenes/eval.py \
     --csv-out nuscenes/results/intentformer_preds_vfuture_intent_val.csv
 ```
 
-## Headline metrics
+## Headline metrics (run `vfuture_intent`)
 
-_TBD — filled in after the full training and eval sweep completes._
+50-epoch fit, EarlyStopping(monitor=`val_traj_o_accuracy`, patience=7) fired at
+epoch 11 → 42 min wall on RTX 3090. 11 checkpoints saved.
+
+Sweep over `cp_*.h5` on the 3 660-record val split (full table at
+`weights_v_nuscenes/vvfuture_intent/val_sweep.log`). Headline checkpoint
+picked by val ROC-AUC, also best by F1: **`cp_05.h5`** (epoch 5).
+
+| Metric | Value |
+|---|---:|
+| ROC AUC | **0.7782** |
+| Avg precision (PR-AUC) | 0.5470 |
+| Accuracy @ 0.5 | 0.7664 |
+| Precision @ 0.5 | 0.4690 |
+| Recall @ 0.5 | 0.5826 |
+| F1 @ 0.5 | 0.5197 |
+| Best threshold | 0.4471 |
+| F1 @ best | **0.5278** |
+| P @ best | 0.4578 |
+| R @ best | 0.6230 |
+
+Per-sample predictions: `results/intentformer_preds_vfuture_intent_val.csv`
+(columns match EfficientPIE's `preds_future_intent_val.csv`).
+
+Eval drops the last partial batch — sweep operates on 3 656/3 660 records.
+n_pos=793, n_neg=2 863 on the scored subset (21.7 %).
 
 ## Comparison vs. EfficientPIE-vfuture_intent
 
-_TBD — intersect on `(instance_token, sample_token)`._
+`compare_with_efficientpie.py` intersects the two CSVs on
+`(instance_token, sample_token)` → 3 656 records (all IntentFormer rows are
+also in EfficientPIE; 0 label disagreements ⇒ same upstream JSON + intent_label).
+
+Apples-to-apples on the intersected 3 656-record subset:
+
+| Metric | IntentFormer (cp_05) | EfficientPIE (model_19) | Δ |
+|---|---:|---:|---:|
+| ROC AUC | **0.7782** | 0.7150 | **+0.0632** |
+| Avg precision (PR-AUC) | **0.5468** | 0.4834 | +0.0634 |
+| Accuracy @ 0.5 | 0.7664 | 0.7713 | −0.0049 |
+| F1 @ 0.5 | **0.5197** | 0.4382 | +0.0815 |
+| F1 @ best threshold | **0.5278** | 0.4625 | +0.0653 |
+| P @ best | 0.4578 | 0.4346 | +0.0232 |
+| R @ best | **0.6230** | 0.4943 | +0.1287 |
+
+Recall jumps the most (+0.13) — IntentFormer surfaces more crossing
+pedestrians at comparable precision, despite using *less* training data
+(13 433 records vs. EfficientPIE's 19 251 — the seq filter requires 3-frame
+visibility).
+
+For context, the unintersected baselines (each model on its own full val):
+
+| | n_val | AUC | F1@best |
+|---|---:|---:|---:|
+| IntentFormer | 3 656 | 0.7782 | 0.5278 |
+| EfficientPIE | 5 682 | 0.6944 | 0.4176 |
 
 ## Open questions
 
