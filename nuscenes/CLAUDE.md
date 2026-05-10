@@ -23,7 +23,7 @@ EfficientPIE's `vfuture_intent` (AUC 0.6944, F1@best 0.4176).
 | Camera | CAM_FRONT only. |
 | Train scenes | 321 from `/mnt/storage/EfficientPIE/nuscenes_infos_temporal_train.pkl`. |
 | Val scenes | 150 official via `nuscenes.utils.splits.create_splits_scenes()`. |
-| Filter | category `human.pedestrian.*`, `num_lidar_pts ≥ 1` OR `num_radar_pts ≥ 1`, 2D bbox side ≥ 20 px, in CAM_FRONT — **applied to every frame in the window**. |
+| Filter | category `human.pedestrian.*`, `num_lidar_pts ≥ 1` OR `num_radar_pts ≥ 1`, 2D bbox side ≥ 20 px, in CAM_FRONT — **applied to anchor frame only**; past frames may be UniAD-style zero placeholders (`bbox=[0,0,0,0]`, `visibility=False`) when the agent is occluded. Each record carries `visibility=[bool, bool, bool]`. |
 | Crop | `squarify` + `img_pad('pad_resize', 224)` (notebook cells 6,7,9). |
 | Segmentation | precomputed once with SegFormer-B0 (ADE20k) on each unique CAM_FRONT keyframe; cached as palette PNG at `/mnt/storage/IntentFormer/seg_cache/<sample_token>.png`. |
 | Class balancing | none (matches `vfuture_intent`); `--no-seg` ablates the seg modality. |
@@ -42,26 +42,45 @@ EfficientPIE's `vfuture_intent` (AUC 0.6944, F1@best 0.4176).
 | Built seq3 index | `data/nuscenes_ped_intent_seq3_v2.pkl` |
 | SegFormer cache | `/mnt/storage/IntentFormer/seg_cache/<sample_token>.png` |
 
-## Index stats (`data/nuscenes_ped_intent_seq3_v2.pkl`)
+## Index stats (`data/nuscenes_ped_intent_seq3_v2.pkl`, schema v3)
 
 ```
-train: 13 433 records   label_dist={1: 3 656 (27.2%), 0: 9 777 (72.8%)}
-val:    3 660 records   label_dist={1:   793 (21.7%), 0: 2 867 (78.3%)}
-intent_7class (train):  STOPPED=3098  MOVING=6679  Crossing=3656
-intent_7class (val):    STOPPED=1005  MOVING=1862  Crossing=793
-drop reasons:
+train: 18 242 records   label_dist={1: 4 547 (24.9%), 0: 13 695 (75.1%)}
+val:    5 278 records   label_dist={1: 1 040 (19.7%), 0:  4 238 (80.3%)}
+intent_7class (train):  STOPPED=4425  MOVING=9270  Crossing=4547
+intent_7class (val):    STOPPED=1546  MOVING=2692  Crossing=1040
+
+visibility patterns (train+val, 23 520 records):
+  (T,T,T) = 17 093  (full visibility)
+  (F,T,T) =  2 797  (t-2 occluded)
+  (F,F,T) =  2 684  (t-2 and t-1 occluded)
+  (T,F,T) =    946  (t-1 occluded)
+
+anchor drops (record discarded):
+  anchor_not_a_pedestrian   84 844
+  anchor_no_sensor_return    5 172
+  anchor_bbox_too_small      3 370
+  anchor_not_in_cam_front       10
+  anchor_no_annotation           9
+
+past-frame placeholder events (record kept, frame zeroed):
+  past_placeholder_not_a_pedestrian  156 656
+  past_placeholder_no_annotation      18 696
+  past_placeholder_no_sensor_return    9 706
+  past_placeholder_bbox_too_small      6 574
+  past_placeholder_not_in_cam_front      819
+
+other drops:
   intent_undefined        307 519
-  not_a_pedestrian         76 235
   insufficient_history     22 842   (frame_idx < k-1 = 2)
-  no_annotation_in_window  12 388
   non_pedestrian_intent     8 150
-  no_sensor_return_in_window 7 301
-  bbox_too_small_in_window  3 371
-  not_in_cam_front_in_window  537
 ```
 
 EfficientPIE-vfuture_intent (per-frame, single image) has 19 251 train / 5 682 val.
-Our seq3 filter (require k=3 frames visible) drops ~30% (train) and ~36% (val).
+With UniAD-style zero placeholders for occluded past frames, our seq3 set is now
+within ~5% of EfficientPIE on train (18 242 vs 19 251) and ~7% on val
+(5 278 vs 5 682). The schema-v2 (k=3 strict-visibility) variant only had
+13 433 / 3 660 — i.e. dropped 30 %/36 % vs. EfficientPIE.
 
 ## Files
 
@@ -77,17 +96,18 @@ Our seq3 filter (require k=3 frames visible) drops ~30% (train) and ~36% (val).
 | [verify.py](verify.py) | 7-check verification suite. |
 | [smoke.sh](smoke.sh) | 1-epoch, 200/200 records smoke wrapper. |
 
-## Verification (7 checks — all PASS)
+## Verification (8 checks — all PASS)
 
 | # | Check | Result |
 |---|---|---|
-| 1 | Index meta (`k=3`, `look_ahead=4`, `seg_cache_dir`, `source_pkl`, `source_json`) | PASS |
+| 1 | Index meta (`k=3`, `look_ahead=4`, `seg_cache_dir`, `source_pkl`, `source_json`, `index_schema_version=3`) | PASS |
 | 2 | `intent_label()` property test (134 953 random calls vs EfficientPIE source) | PASS — 0 mismatches |
 | 3 | End-to-end label provenance (16 random pkl records vs raw JSON) | PASS — 0 mismatches |
-| 4 | Train/eval loader agreement (record counts) | PASS — 13 433 / 3 660 |
+| 4 | Train/eval loader agreement (record counts) | PASS — 18 242 / 5 278 |
 | 5 | Transform agreement (val/train deterministic-pipeline equality, no aug) | PASS |
-| 6 | Metrics-from-CSV reproducibility | PASS — CSV AUC=0.7782 matches `eval.py` to all 4 digits |
-| 7 | Seg-cache coverage (every needed `sample_token` has a cached PNG) | PASS — 7 725 / 7 725 needed cached |
+| 6 | Metrics-from-CSV reproducibility | PASS (after eval CSV emitted) |
+| 7 | Seg-cache coverage (every needed `sample_token` has a cached PNG) | PASS — 9 153 / 9 153 needed cached |
+| 8 | Visibility schema (anchor always True; placeholder iff `bbox=[0,0,0,0]`) | PASS — 0 missing, 0 anchor-invisible, 0 disagreements |
 
 Run: `python3 verify.py [--csv results/intentformer_preds_vfuture_intent_val.csv]`.
 

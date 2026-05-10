@@ -14,3 +14,96 @@ Starting fit ...
 Epoch 1: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vsmoke/cp_01.h5
 50/50 - 15s - loss: 3.2930 - rgb_o_loss: 0.6446 - seg_o_loss: 0.6348 - traj_o_loss: 0.6766 - rgb_o_accuracy: 0.6750 - seg_o_accuracy: 0.7250 - traj_o_accuracy: 0.7000 - val_loss: 3.0530 - val_rgb_o_loss: 0.6562 - val_seg_o_loss: 0.5670 - val_traj_o_loss: 0.5821 - val_rgb_o_accuracy: 0.7400 - val_seg_o_accuracy: 0.7400 - val_traj_o_accuracy: 0.7350 - lr: 1.0000e-04 - 15s/epoch - 291ms/step
 Done. Total fit wall-time: 0.3 min
+==== train.py @ 2026-05-10 11:08:14 ====
+args: {'index': 'data/nuscenes_ped_intent_seq3_v2.pkl', 'epochs': 1, 'batch_size': 4, 'lr': 0.0001, 'weight_decay': 1e-05, 'version': 'smoke', 'device': 'cuda:0', 'train_limit': 200, 'val_limit': 200, 'shuffle': True, 'no_seg': False, 'seed': 42, 'weights_out': '/root/IntentFormer/nuscenes/weights_v_nuscenes'}
+Loading seq index data/nuscenes_ped_intent_seq3_v2.pkl ...
+  train: 18242  val: 5278
+  meta: {'k': 3, 'look_ahead': 4, 'min_bbox': 20, 'nusc_version': 'v1.0-trainval', 'drop_reasons': {'insufficient_history': 22842, 'intent_undefined': 307519, 'past_frame_placeholder': 192451, 'past_placeholder_no_annotation': 18696, 'anchor_not_a_pedestrian': 84844, 'past_placeholder_not_a_pedestrian': 156656, 'non_pedestrian_intent': 8150, 'past_placeholder_bbox_too_small': 6574, 'anchor_bbox_too_small': 3370, 'anchor_no_sensor_return': 5172, 'past_placeholder_no_sensor_return': 9706, 'past_placeholder_not_in_cam_front': 819, 'anchor_not_in_cam_front': 10, 'anchor_no_annotation': 9}, 'n_train_scenes': 321, 'n_val_scenes': 150, 'source_pkl': '/mnt/storage/EfficientPIE/nuscenes_infos_temporal_train.pkl', 'source_json': '/mnt/nuscenes/nuScenes/unified_map_v3/all_scenes_compact_new.json', 'seg_cache_dir': '/mnt/storage/IntentFormer/seg_cache', 'index_schema_version': 3, 'past_frame_placeholders_allowed': True}
+after limits: train=200 val=200
+  train positives: 56/200 (28.0%)
+  val   positives: 36/200 (18.0%)
+steps/epoch: train=50 val=50
+Building model ...
+params: 5,804,982
+Starting fit ...
+Traceback (most recent call last):
+  File "train.py", line 156, in <module>
+    main()
+  File "train.py", line 145, in main
+    model.fit(train_gen,
+  File "/usr/local/lib/python3.8/dist-packages/keras/utils/traceback_utils.py", line 70, in error_handler
+    raise e.with_traceback(filtered_tb) from None
+  File "/usr/local/lib/python3.8/dist-packages/tensorflow/python/eager/execute.py", line 54, in quick_execute
+    tensors = pywrap_tfe.TFE_Py_Execute(ctx._handle, device_name, op_name,
+tensorflow.python.framework.errors_impl.UnimplementedError: Graph execution error:
+
+Detected at node 'IntentFormer_k3/tubelet_embedding/conv3d/Conv3D' defined at (most recent call last):
+    File "train.py", line 156, in <module>
+      main()
+    File "train.py", line 145, in main
+      model.fit(train_gen,
+    File "/usr/local/lib/python3.8/dist-packages/keras/utils/traceback_utils.py", line 65, in error_handler
+      return fn(*args, **kwargs)
+    File "/usr/local/lib/python3.8/dist-packages/keras/engine/training.py", line 1564, in fit
+      tmp_logs = self.train_function(iterator)
+    File "/usr/local/lib/python3.8/dist-packages/keras/engine/training.py", line 1160, in train_function
+      return step_function(self, iterator)
+    File "/usr/local/lib/python3.8/dist-packages/keras/engine/training.py", line 1146, in step_function
+      outputs = model.distribute_strategy.run(run_step, args=(data,))
+    File "/usr/local/lib/python3.8/dist-packages/keras/engine/training.py", line 1135, in run_step
+      outputs = model.train_step(data)
+    File "/usr/local/lib/python3.8/dist-packages/keras/engine/training.py", line 993, in train_step
+      y_pred = self(x, training=True)
+    File "/usr/local/lib/python3.8/dist-packages/keras/utils/traceback_utils.py", line 65, in error_handler
+      return fn(*args, **kwargs)
+    File "/usr/local/lib/python3.8/dist-packages/keras/engine/training.py", line 557, in __call__
+      return super().__call__(*args, **kwargs)
+    File "/usr/local/lib/python3.8/dist-packages/keras/utils/traceback_utils.py", line 65, in error_handler
+      return fn(*args, **kwargs)
+    File "/usr/local/lib/python3.8/dist-packages/keras/engine/base_layer.py", line 1097, in __call__
+      outputs = call_fn(inputs, *args, **kwargs)
+    File "/usr/local/lib/python3.8/dist-packages/keras/utils/traceback_utils.py", line 96, in error_handler
+      return fn(*args, **kwargs)
+    File "/usr/local/lib/python3.8/dist-packages/keras/engine/functional.py", line 510, in call
+      return self._run_internal_graph(inputs, training=training, mask=mask)
+    File "/usr/local/lib/python3.8/dist-packages/keras/engine/functional.py", line 667, in _run_internal_graph
+      outputs = node.layer(*args, **kwargs)
+    File "/usr/local/lib/python3.8/dist-packages/keras/utils/traceback_utils.py", line 65, in error_handler
+      return fn(*args, **kwargs)
+    File "/usr/local/lib/python3.8/dist-packages/keras/engine/base_layer.py", line 1097, in __call__
+      outputs = call_fn(inputs, *args, **kwargs)
+    File "/usr/local/lib/python3.8/dist-packages/keras/utils/traceback_utils.py", line 96, in error_handler
+      return fn(*args, **kwargs)
+    File "/root/IntentFormer/nuscenes/model.py", line 49, in call
+      if vid == 0:
+    File "/root/IntentFormer/nuscenes/model.py", line 50, in call
+      projected_patches = self.projection(videos)
+    File "/usr/local/lib/python3.8/dist-packages/keras/utils/traceback_utils.py", line 65, in error_handler
+      return fn(*args, **kwargs)
+    File "/usr/local/lib/python3.8/dist-packages/keras/engine/base_layer.py", line 1097, in __call__
+      outputs = call_fn(inputs, *args, **kwargs)
+    File "/usr/local/lib/python3.8/dist-packages/keras/utils/traceback_utils.py", line 96, in error_handler
+      return fn(*args, **kwargs)
+    File "/usr/local/lib/python3.8/dist-packages/keras/layers/convolutional/base_conv.py", line 283, in call
+      outputs = self.convolution_op(inputs, self.kernel)
+    File "/usr/local/lib/python3.8/dist-packages/keras/layers/convolutional/base_conv.py", line 255, in convolution_op
+      return tf.nn.convolution(
+Node: 'IntentFormer_k3/tubelet_embedding/conv3d/Conv3D'
+DNN library is not found.
+	 [[{{node IntentFormer_k3/tubelet_embedding/conv3d/Conv3D}}]] [Op:__inference_train_function_11369]
+==== train.py @ 2026-05-10 11:09:21 ====
+args: {'index': 'data/nuscenes_ped_intent_seq3_v2.pkl', 'epochs': 1, 'batch_size': 4, 'lr': 0.0001, 'weight_decay': 1e-05, 'version': 'smoke', 'device': 'cuda:0', 'train_limit': 200, 'val_limit': 200, 'shuffle': True, 'no_seg': False, 'seed': 42, 'weights_out': '/root/IntentFormer/nuscenes/weights_v_nuscenes'}
+Loading seq index data/nuscenes_ped_intent_seq3_v2.pkl ...
+  train: 18242  val: 5278
+  meta: {'k': 3, 'look_ahead': 4, 'min_bbox': 20, 'nusc_version': 'v1.0-trainval', 'drop_reasons': {'insufficient_history': 22842, 'intent_undefined': 307519, 'past_frame_placeholder': 192451, 'past_placeholder_no_annotation': 18696, 'anchor_not_a_pedestrian': 84844, 'past_placeholder_not_a_pedestrian': 156656, 'non_pedestrian_intent': 8150, 'past_placeholder_bbox_too_small': 6574, 'anchor_bbox_too_small': 3370, 'anchor_no_sensor_return': 5172, 'past_placeholder_no_sensor_return': 9706, 'past_placeholder_not_in_cam_front': 819, 'anchor_not_in_cam_front': 10, 'anchor_no_annotation': 9}, 'n_train_scenes': 321, 'n_val_scenes': 150, 'source_pkl': '/mnt/storage/EfficientPIE/nuscenes_infos_temporal_train.pkl', 'source_json': '/mnt/nuscenes/nuScenes/unified_map_v3/all_scenes_compact_new.json', 'seg_cache_dir': '/mnt/storage/IntentFormer/seg_cache', 'index_schema_version': 3, 'past_frame_placeholders_allowed': True}
+after limits: train=200 val=200
+  train positives: 56/200 (28.0%)
+  val   positives: 36/200 (18.0%)
+steps/epoch: train=50 val=50
+Building model ...
+params: 5,804,982
+Starting fit ...
+
+Epoch 1: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vsmoke/cp_01.h5
+50/50 - 44s - loss: 3.3945 - rgb_o_loss: 0.7198 - seg_o_loss: 0.7743 - traj_o_loss: 0.7312 - rgb_o_accuracy: 0.6200 - seg_o_accuracy: 0.6900 - traj_o_accuracy: 0.6550 - val_loss: 2.5111 - val_rgb_o_loss: 0.4601 - val_seg_o_loss: 0.4632 - val_traj_o_loss: 0.5247 - val_rgb_o_accuracy: 0.8300 - val_seg_o_accuracy: 0.8200 - val_traj_o_accuracy: 0.8200 - lr: 1.0000e-04 - 44s/epoch - 875ms/step
+Done. Total fit wall-time: 0.7 min

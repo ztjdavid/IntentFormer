@@ -3,15 +3,22 @@ Build a sequence-aware (k=3) index for IntentFormer-on-nuScenes.
 
 For each (pedestrian instance, anchor keyframe) where:
   - intent_label() at the anchor returns >= 0 (look_ahead = 4),
-  - the same instance is visible (3D-projected, sensor-return, bbox >= --min-bbox)
-    in EVERY frame of the window [anchor - (k-1) .. anchor],
+  - the same instance is visible (3D-projected, sensor-return, bbox >= --min-bbox,
+    category_name starts with 'human.pedestrian.') in the ANCHOR frame [t],
   - the JSON's per-instance action_array spans the full window,
-  - category_name starts with 'human.pedestrian.',
 write a record:
     {img_paths[k], seg_paths[k], bboxes[k] (each [x1,y1,x2,y2]),
-     ego_speeds[k] (m/s), sample_tokens[k],
+     ego_speeds[k] (m/s), sample_tokens[k], visibility[k] (bool),
      label (0/1), csv_label, intent_7class,
      instance_token, sample_token (anchor), scene_token, scene_name, frame_idx}
+
+Past frames [t-(k-1) .. t-1] may be PLACEHOLDERS when the instance is
+occluded / not annotated / behind camera / too small. A placeholder frame
+has bbox=[0,0,0,0] and visibility=False; img_path/seg_path point to that
+sample's CAM_FRONT JPEG and seg PNG (always exist) so data_gen.py can
+load them, and the degenerate bbox produces an all-zero RGB+seg crop and
+[0,0,0,0] bbox feature -- the UniAD-style "zero query" for that temporal
+slot. The anchor element of visibility[] is always True.
 
 Binary label mapping (same as EfficientPIE vfuture_intent):
   Crossing (intent7 == 2)              -> 1
@@ -187,6 +194,33 @@ def compute_ego_speeds(nusc, samples):
     return speeds
 
 
+def try_get_visible_frame(nusc, sample, ann, min_bbox):
+    """Return (img_path, bbox, ok, reason). ann may be None.
+
+    img_path/bbox are the projected CAM_FRONT crop coords when ok; otherwise
+    img_path is None (caller must substitute the sample's CAM_FRONT JPEG).
+    """
+    if ann is None:
+        return None, None, False, 'no_annotation'
+    if not ann['category_name'].startswith('human.pedestrian.'):
+        return None, None, False, 'not_a_pedestrian'
+    if ann['num_lidar_pts'] == 0 and ann['num_radar_pts'] == 0:
+        return None, None, False, 'no_sensor_return'
+    proj = project_to_cam_front(nusc, sample, ann['token'])
+    if proj is None:
+        return None, None, False, 'not_in_cam_front'
+    img_path, bbox = proj
+    if (bbox[2] - bbox[0]) < min_bbox or (bbox[3] - bbox[1]) < min_bbox:
+        return img_path, bbox, False, 'bbox_too_small'
+    return img_path, bbox, True, None
+
+
+def cam_front_jpeg_path(nusc, sample):
+    """Resolve the CAM_FRONT JPEG path for a sample. Always exists."""
+    sd = nusc.get('sample_data', sample['data']['CAM_FRONT'])
+    return os.path.join(nusc.dataroot, sd['filename'])
+
+
 def build_seq_records_for_scene(nusc, scene, json_data, k, min_bbox, seg_cache_dir):
     """Return (records, drop_reasons Counter) for one scene."""
     if scene['token'] not in json_data:
@@ -231,40 +265,43 @@ def build_seq_records_for_scene(nusc, scene, json_data, k, min_bbox, seg_cache_d
 
             window_ok = True
             window_frames = []
+            window_visibility = []
             for fidx in range(frame_idx - (k - 1), frame_idx + 1):
+                is_anchor = (fidx == frame_idx)
                 sample = samples[fidx]
                 ann = sample_inst_to_ann[fidx].get(inst_tok)
-                if ann is None:
-                    drop_reasons['no_annotation_in_window'] += 1
+                img_path, bbox, ok, reason = try_get_visible_frame(
+                    nusc, sample, ann, min_bbox)
+
+                if ok:
+                    window_frames.append({
+                        'img_path': img_path,
+                        'bbox': bbox,
+                        'sample_token': sample['token'],
+                        'ego_speed': ego_speeds_all[fidx],
+                        'seg_path': os.path.join(
+                            seg_cache_dir, f"{sample['token']}.png"),
+                    })
+                    window_visibility.append(True)
+                elif is_anchor:
+                    drop_reasons[f'anchor_{reason}'] += 1
                     window_ok = False
                     break
-                if not ann['category_name'].startswith('human.pedestrian.'):
-                    drop_reasons['not_a_pedestrian'] += 1
-                    window_ok = False
-                    break
-                if ann['num_lidar_pts'] == 0 and ann['num_radar_pts'] == 0:
-                    drop_reasons['no_sensor_return_in_window'] += 1
-                    window_ok = False
-                    break
-                proj = project_to_cam_front(nusc, sample, ann['token'])
-                if proj is None:
-                    drop_reasons['not_in_cam_front_in_window'] += 1
-                    window_ok = False
-                    break
-                img_path, bbox = proj
-                w = bbox[2] - bbox[0]
-                h = bbox[3] - bbox[1]
-                if w < min_bbox or h < min_bbox:
-                    drop_reasons['bbox_too_small_in_window'] += 1
-                    window_ok = False
-                    break
-                window_frames.append({
-                    'img_path': img_path,
-                    'bbox': bbox,
-                    'sample_token': sample['token'],
-                    'ego_speed': ego_speeds_all[fidx],
-                    'seg_path': os.path.join(seg_cache_dir, f"{sample['token']}.png"),
-                })
+                else:
+                    # Past frame placeholder: zero bbox -> zero RGB+seg crop
+                    # in data_gen._crop_resize, [0,0,0,0] bbox feature in
+                    # data_gen._load_seq. UniAD-style "zero query".
+                    drop_reasons['past_frame_placeholder'] += 1
+                    drop_reasons[f'past_placeholder_{reason}'] += 1
+                    window_frames.append({
+                        'img_path': cam_front_jpeg_path(nusc, sample),
+                        'bbox': [0.0, 0.0, 0.0, 0.0],
+                        'sample_token': sample['token'],
+                        'ego_speed': ego_speeds_all[fidx],
+                        'seg_path': os.path.join(
+                            seg_cache_dir, f"{sample['token']}.png"),
+                    })
+                    window_visibility.append(False)
             if not window_ok:
                 continue
 
@@ -274,6 +311,7 @@ def build_seq_records_for_scene(nusc, scene, json_data, k, min_bbox, seg_cache_d
                 'bboxes': [f['bbox'] for f in window_frames],
                 'ego_speeds': [f['ego_speed'] for f in window_frames],
                 'sample_tokens': [f['sample_token'] for f in window_frames],
+                'visibility': window_visibility,
                 'label': label,
                 'csv_label': action_array[frame_idx],
                 'instance_token': inst_tok,
@@ -331,6 +369,8 @@ def main():
                              'seg_cache_dir': args.seg_cache_dir,
                              'source_pkl': args.train_pkl,
                              'source_json': args.json,
+                             'index_schema_version': 3,
+                             'past_frame_placeholders_allowed': True,
                          }}, f)
         print(f'wrote smoke seq index -> {out}')
         return
@@ -385,6 +425,8 @@ def main():
                 'source_pkl': args.train_pkl,
                 'source_json': args.json,
                 'seg_cache_dir': args.seg_cache_dir,
+                'index_schema_version': 3,
+                'past_frame_placeholders_allowed': True,
             },
         }, f)
     print(f'wrote -> {args.out}')

@@ -1,6 +1,6 @@
 """
-7-check verification suite for the IntentFormer-on-nuScenes pipeline.
-Mirrors EfficientPIE's 6 checks + seg-cache coverage.
+8-check verification suite for the IntentFormer-on-nuScenes pipeline.
+Mirrors EfficientPIE's 6 checks + seg-cache coverage + visibility schema.
 
   1. Index meta sanity.
   2. intent_label() property test (134k random calls vs UniAD source).
@@ -9,6 +9,8 @@ Mirrors EfficientPIE's 6 checks + seg-cache coverage.
   5. Transform agreement (val branch of __get_input == eval crop pipeline).
   6. Metrics-from-CSV reproducibility (run after eval.py emits CSV).
   7. Seg-cache coverage (every sample_token in seq pkl has a cached PNG).
+  8. Visibility schema (every record has visibility[k]; anchor always True;
+     placeholder records have bbox=[0,0,0,0] iff visibility[i]==False).
 
 Skips checks that require artefacts not yet present, with a printed note.
 Returns non-zero exit if any executed check fails.
@@ -215,6 +217,36 @@ def check7_seg_coverage(pkl):
     return len(missing) == 0
 
 
+def check8_visibility(pkl):
+    section(8, 'Visibility schema (anchor always True; placeholder iff bbox=[0,0,0,0])')
+    missing = 0
+    n_anchor_invisible = 0
+    n_bbox_visibility_disagree = 0
+    pattern_dist = Counter()
+    for split in ('train', 'val'):
+        for r in pkl[split]:
+            v = r.get('visibility')
+            if v is None or len(v) != 3:
+                missing += 1
+                continue
+            if not v[-1]:
+                n_anchor_invisible += 1
+            for i, (vis, bbox) in enumerate(zip(v, r['bboxes'])):
+                is_zero = (list(bbox) == [0.0, 0.0, 0.0, 0.0])
+                if vis and is_zero:
+                    n_bbox_visibility_disagree += 1
+                elif (not vis) and (not is_zero):
+                    n_bbox_visibility_disagree += 1
+            pattern_dist[tuple(v)] += 1
+    print(f'  records missing visibility field (must be 0): {missing}')
+    print(f'  anchor-invisible records (must be 0):         {n_anchor_invisible}')
+    print(f'  bbox/visibility disagreements (must be 0):    {n_bbox_visibility_disagree}')
+    print(f'  visibility patterns: {dict(pattern_dist)}')
+    return (missing == 0
+            and n_anchor_invisible == 0
+            and n_bbox_visibility_disagree == 0)
+
+
 def main():
     args = parse_args()
 
@@ -231,6 +263,7 @@ def main():
     results.append(('5.transform',   check5_transform(pkl)))
     results.append(('6.csv',         check6_csv(args.csv)))
     results.append(('7.seg_cov',     check7_seg_coverage(pkl)))
+    results.append(('8.visibility',  check8_visibility(pkl)))
 
     print('\n=== Summary ===')
     for name, ok in results:

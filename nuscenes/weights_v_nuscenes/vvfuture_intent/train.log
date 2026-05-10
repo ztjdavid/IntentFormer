@@ -1,59 +1,52 @@
-==== train.py @ 2026-05-10 04:35:12 ====
-args: {'index': 'data/nuscenes_ped_intent_seq3_v2.pkl', 'epochs': 50, 'batch_size': 16, 'lr': 0.0001, 'weight_decay': 1e-05, 'version': 'vfuture_intent', 'device': 'cuda:0', 'train_limit': 0, 'val_limit': 0, 'shuffle': False, 'no_seg': False, 'seed': 42, 'weights_out': '/root/IntentFormer/nuscenes/weights_v_nuscenes'}
-Loading seq index data/nuscenes_ped_intent_seq3_v2.pkl ...
-  train: 13433  val: 3660
-  meta: {'k': 3, 'look_ahead': 4, 'min_bbox': 20, 'nusc_version': 'v1.0-trainval', 'drop_reasons': {'insufficient_history': 22842, 'intent_undefined': 307519, 'no_annotation_in_window': 12388, 'not_a_pedestrian': 76235, 'non_pedestrian_intent': 8150, 'bbox_too_small_in_window': 3371, 'no_sensor_return_in_window': 7301, 'not_in_cam_front_in_window': 537}, 'n_train_scenes': 321, 'n_val_scenes': 150, 'source_pkl': '/mnt/storage/EfficientPIE/nuscenes_infos_temporal_train.pkl', 'source_json': '/mnt/nuscenes/nuScenes/unified_map_v3/all_scenes_compact_new.json', 'seg_cache_dir': '/mnt/storage/IntentFormer/seg_cache'}
-after limits: train=13433 val=3660
-  train positives: 3656/13433 (27.2%)
-  val   positives: 793/3660 (21.7%)
-steps/epoch: train=839 val=228
+==== train.py @ 2026-05-10 11:11:17 ====
+args: {'index': 'nuscenes/data/nuscenes_ped_intent_seq3_v2.pkl', 'epochs': 50, 'batch_size': 8, 'lr': 0.0001, 'weight_decay': 1e-05, 'version': 'vfuture_intent', 'device': 'cuda:0', 'train_limit': 0, 'val_limit': 0, 'shuffle': False, 'no_seg': False, 'seed': 42, 'weights_out': '/root/IntentFormer/nuscenes/weights_v_nuscenes'}
+Loading seq index nuscenes/data/nuscenes_ped_intent_seq3_v2.pkl ...
+Traceback (most recent call last):
+  File "train.py", line 156, in <module>
+    main()
+  File "train.py", line 86, in main
+    train_recs, meta = load_records(args.index, 'train')
+  File "/root/IntentFormer/nuscenes/data_gen.py", line 173, in load_records
+    with open(pkl_path, 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'nuscenes/data/nuscenes_ped_intent_seq3_v2.pkl'
+==== train.py @ 2026-05-10 11:12:10 ====
+args: {'index': '/root/IntentFormer/nuscenes/data/nuscenes_ped_intent_seq3_v2.pkl', 'epochs': 50, 'batch_size': 8, 'lr': 0.0001, 'weight_decay': 1e-05, 'version': 'vfuture_intent', 'device': 'cuda:0', 'train_limit': 0, 'val_limit': 0, 'shuffle': False, 'no_seg': False, 'seed': 42, 'weights_out': '/root/IntentFormer/nuscenes/weights_v_nuscenes'}
+Loading seq index /root/IntentFormer/nuscenes/data/nuscenes_ped_intent_seq3_v2.pkl ...
+  train: 18242  val: 5278
+  meta: {'k': 3, 'look_ahead': 4, 'min_bbox': 20, 'nusc_version': 'v1.0-trainval', 'drop_reasons': {'insufficient_history': 22842, 'intent_undefined': 307519, 'past_frame_placeholder': 192451, 'past_placeholder_no_annotation': 18696, 'anchor_not_a_pedestrian': 84844, 'past_placeholder_not_a_pedestrian': 156656, 'non_pedestrian_intent': 8150, 'past_placeholder_bbox_too_small': 6574, 'anchor_bbox_too_small': 3370, 'anchor_no_sensor_return': 5172, 'past_placeholder_no_sensor_return': 9706, 'past_placeholder_not_in_cam_front': 819, 'anchor_not_in_cam_front': 10, 'anchor_no_annotation': 9}, 'n_train_scenes': 321, 'n_val_scenes': 150, 'source_pkl': '/mnt/storage/EfficientPIE/nuscenes_infos_temporal_train.pkl', 'source_json': '/mnt/nuscenes/nuScenes/unified_map_v3/all_scenes_compact_new.json', 'seg_cache_dir': '/mnt/storage/IntentFormer/seg_cache', 'index_schema_version': 3, 'past_frame_placeholders_allowed': True}
+after limits: train=18242 val=5278
+  train positives: 4547/18242 (24.9%)
+  val   positives: 1040/5278 (19.7%)
+steps/epoch: train=2280 val=659
 Building model ...
 params: 5,804,982
 Starting fit ...
 Epoch 1/50
 
 Epoch 1: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vvfuture_intent/cp_01.h5
-839/839 - 304s - loss: 2.1963 - rgb_o_loss: 0.5978 - seg_o_loss: 0.5477 - traj_o_loss: 0.5476 - rgb_o_accuracy: 0.7084 - seg_o_accuracy: 0.7401 - traj_o_accuracy: 0.7449 - val_loss: 1.7996 - val_rgb_o_loss: 0.5157 - val_seg_o_loss: 0.5029 - val_traj_o_loss: 0.5134 - val_rgb_o_accuracy: 0.7862 - val_seg_o_accuracy: 0.7404 - val_traj_o_accuracy: 0.7399 - lr: 1.0000e-04 - 304s/epoch - 362ms/step
+2280/2280 - 527s - loss: 1.9391 - rgb_o_loss: 0.5684 - seg_o_loss: 0.5269 - traj_o_loss: 0.5240 - rgb_o_accuracy: 0.7356 - seg_o_accuracy: 0.7573 - traj_o_accuracy: 0.7612 - val_loss: 1.6100 - val_rgb_o_loss: 0.5201 - val_seg_o_loss: 0.4605 - val_traj_o_loss: 0.4690 - val_rgb_o_accuracy: 0.8033 - val_seg_o_accuracy: 0.8141 - val_traj_o_accuracy: 0.8122 - lr: 1.0000e-04 - 527s/epoch - 231ms/step
 Epoch 2/50
 
 Epoch 2: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vvfuture_intent/cp_02.h5
-839/839 - 214s - loss: 1.7998 - rgb_o_loss: 0.5570 - seg_o_loss: 0.5103 - traj_o_loss: 0.5080 - rgb_o_accuracy: 0.7265 - seg_o_accuracy: 0.7680 - traj_o_accuracy: 0.7709 - val_loss: 1.6895 - val_rgb_o_loss: 0.5560 - val_seg_o_loss: 0.4707 - val_traj_o_loss: 0.4725 - val_rgb_o_accuracy: 0.7834 - val_seg_o_accuracy: 0.7985 - val_traj_o_accuracy: 0.7991 - lr: 1.0000e-04 - 214s/epoch - 255ms/step
+2280/2280 - 365s - loss: 1.6577 - rgb_o_loss: 0.5290 - seg_o_loss: 0.4864 - traj_o_loss: 0.4869 - rgb_o_accuracy: 0.7514 - seg_o_accuracy: 0.7862 - traj_o_accuracy: 0.7850 - val_loss: 1.4943 - val_rgb_o_loss: 0.4827 - val_seg_o_loss: 0.4390 - val_traj_o_loss: 0.4399 - val_rgb_o_accuracy: 0.8054 - val_seg_o_accuracy: 0.8234 - val_traj_o_accuracy: 0.8255 - lr: 1.0000e-04 - 365s/epoch - 160ms/step
 Epoch 3/50
 
 Epoch 3: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vvfuture_intent/cp_03.h5
-839/839 - 229s - loss: 1.7092 - rgb_o_loss: 0.5365 - seg_o_loss: 0.4936 - traj_o_loss: 0.4892 - rgb_o_accuracy: 0.7385 - seg_o_accuracy: 0.7792 - traj_o_accuracy: 0.7774 - val_loss: 1.6639 - val_rgb_o_loss: 0.4950 - val_seg_o_loss: 0.4971 - val_traj_o_loss: 0.5082 - val_rgb_o_accuracy: 0.7692 - val_seg_o_accuracy: 0.7601 - val_traj_o_accuracy: 0.7558 - lr: 1.0000e-04 - 229s/epoch - 273ms/step
+2280/2280 - 423s - loss: 1.5467 - rgb_o_loss: 0.5030 - seg_o_loss: 0.4517 - traj_o_loss: 0.4516 - rgb_o_accuracy: 0.7607 - seg_o_accuracy: 0.8077 - traj_o_accuracy: 0.8043 - val_loss: 1.5475 - val_rgb_o_loss: 0.4849 - val_seg_o_loss: 0.4639 - val_traj_o_loss: 0.4657 - val_rgb_o_accuracy: 0.7841 - val_seg_o_accuracy: 0.7929 - val_traj_o_accuracy: 0.7915 - lr: 1.0000e-04 - 423s/epoch - 186ms/step
 Epoch 4/50
 
 Epoch 4: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vvfuture_intent/cp_04.h5
-839/839 - 222s - loss: 1.5587 - rgb_o_loss: 0.4951 - seg_o_loss: 0.4462 - traj_o_loss: 0.4447 - rgb_o_accuracy: 0.7675 - seg_o_accuracy: 0.8064 - traj_o_accuracy: 0.8080 - val_loss: 1.5452 - val_rgb_o_loss: 0.4816 - val_seg_o_loss: 0.4455 - val_traj_o_loss: 0.4489 - val_rgb_o_accuracy: 0.7881 - val_seg_o_accuracy: 0.8048 - val_traj_o_accuracy: 0.8004 - lr: 1.0000e-04 - 222s/epoch - 264ms/step
+2280/2280 - 421s - loss: 1.4631 - rgb_o_loss: 0.4800 - seg_o_loss: 0.4220 - traj_o_loss: 0.4245 - rgb_o_accuracy: 0.7826 - seg_o_accuracy: 0.8220 - traj_o_accuracy: 0.8210 - val_loss: 1.4406 - val_rgb_o_loss: 0.4802 - val_seg_o_loss: 0.4217 - val_traj_o_loss: 0.4206 - val_rgb_o_accuracy: 0.7921 - val_seg_o_accuracy: 0.8297 - val_traj_o_accuracy: 0.8314 - lr: 1.0000e-04 - 421s/epoch - 185ms/step
 Epoch 5/50
 
 Epoch 5: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vvfuture_intent/cp_05.h5
-839/839 - 224s - loss: 1.4479 - rgb_o_loss: 0.4626 - seg_o_loss: 0.4085 - traj_o_loss: 0.4088 - rgb_o_accuracy: 0.7915 - seg_o_accuracy: 0.8287 - traj_o_accuracy: 0.8289 - val_loss: 1.6543 - val_rgb_o_loss: 0.5091 - val_seg_o_loss: 0.4860 - val_traj_o_loss: 0.5008 - val_rgb_o_accuracy: 0.7780 - val_seg_o_accuracy: 0.7774 - val_traj_o_accuracy: 0.7659 - lr: 1.0000e-04 - 224s/epoch - 266ms/step
+2280/2280 - 420s - loss: 1.3892 - rgb_o_loss: 0.4558 - seg_o_loss: 0.3982 - traj_o_loss: 0.3990 - rgb_o_accuracy: 0.7948 - seg_o_accuracy: 0.8336 - traj_o_accuracy: 0.8316 - val_loss: 1.5471 - val_rgb_o_loss: 0.4926 - val_seg_o_loss: 0.4611 - val_traj_o_loss: 0.4708 - val_rgb_o_accuracy: 0.7851 - val_seg_o_accuracy: 0.7982 - val_traj_o_accuracy: 0.7896 - lr: 1.0000e-04 - 420s/epoch - 184ms/step
 Epoch 6/50
 
 Epoch 6: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vvfuture_intent/cp_06.h5
-839/839 - 222s - loss: 1.3464 - rgb_o_loss: 0.4305 - seg_o_loss: 0.3751 - traj_o_loss: 0.3757 - rgb_o_accuracy: 0.8113 - seg_o_accuracy: 0.8438 - traj_o_accuracy: 0.8442 - val_loss: 1.7716 - val_rgb_o_loss: 0.5883 - val_seg_o_loss: 0.5116 - val_traj_o_loss: 0.5199 - val_rgb_o_accuracy: 0.7453 - val_seg_o_accuracy: 0.7936 - val_traj_o_accuracy: 0.7832 - lr: 1.0000e-04 - 222s/epoch - 264ms/step
+2280/2280 - 418s - loss: 1.3202 - rgb_o_loss: 0.4325 - seg_o_loss: 0.3745 - traj_o_loss: 0.3748 - rgb_o_accuracy: 0.8112 - seg_o_accuracy: 0.8481 - traj_o_accuracy: 0.8467 - val_loss: 1.6643 - val_rgb_o_loss: 0.5326 - val_seg_o_loss: 0.5025 - val_traj_o_loss: 0.5067 - val_rgb_o_accuracy: 0.7874 - val_seg_o_accuracy: 0.8035 - val_traj_o_accuracy: 0.8039 - lr: 1.0000e-04 - 418s/epoch - 183ms/step
 Epoch 7/50
 
 Epoch 7: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vvfuture_intent/cp_07.h5
-839/839 - 222s - loss: 1.2411 - rgb_o_loss: 0.3954 - seg_o_loss: 0.3420 - traj_o_loss: 0.3410 - rgb_o_accuracy: 0.8287 - seg_o_accuracy: 0.8611 - traj_o_accuracy: 0.8605 - val_loss: 1.8760 - val_rgb_o_loss: 0.5883 - val_seg_o_loss: 0.5487 - val_traj_o_loss: 0.5833 - val_rgb_o_accuracy: 0.7473 - val_seg_o_accuracy: 0.7481 - val_traj_o_accuracy: 0.7275 - lr: 1.0000e-04 - 222s/epoch - 265ms/step
+2280/2280 - 418s - loss: 1.2552 - rgb_o_loss: 0.4148 - seg_o_loss: 0.3523 - traj_o_loss: 0.3515 - rgb_o_accuracy: 0.8225 - seg_o_accuracy: 0.8565 - traj_o_accuracy: 0.8567 - val_loss: 1.6638 - val_rgb_o_loss: 0.5362 - val_seg_o_loss: 0.4955 - val_traj_o_loss: 0.5013 - val_rgb_o_accuracy: 0.7745 - val_seg_o_accuracy: 0.7798 - val_traj_o_accuracy: 0.7773 - lr: 1.0000e-04 - 418s/epoch - 183ms/step
 Epoch 8/50
-
-Epoch 8: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vvfuture_intent/cp_08.h5
-839/839 - 226s - loss: 1.1360 - rgb_o_loss: 0.3611 - seg_o_loss: 0.3072 - traj_o_loss: 0.3072 - rgb_o_accuracy: 0.8476 - seg_o_accuracy: 0.8780 - traj_o_accuracy: 0.8778 - val_loss: 2.5390 - val_rgb_o_loss: 0.7498 - val_seg_o_loss: 0.7897 - val_traj_o_loss: 0.8463 - val_rgb_o_accuracy: 0.6968 - val_seg_o_accuracy: 0.6711 - val_traj_o_accuracy: 0.6538 - lr: 9.0484e-05 - 226s/epoch - 270ms/step
-Epoch 9/50
-
-Epoch 9: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vvfuture_intent/cp_09.h5
-839/839 - 216s - loss: 1.0220 - rgb_o_loss: 0.3263 - seg_o_loss: 0.2708 - traj_o_loss: 0.2667 - rgb_o_accuracy: 0.8652 - seg_o_accuracy: 0.8944 - traj_o_accuracy: 0.8954 - val_loss: 2.1623 - val_rgb_o_loss: 0.7180 - val_seg_o_loss: 0.6367 - val_traj_o_loss: 0.6549 - val_rgb_o_accuracy: 0.7582 - val_seg_o_accuracy: 0.7719 - val_traj_o_accuracy: 0.7719 - lr: 1.6375e-05 - 216s/epoch - 257ms/step
-Epoch 10/50
-
-Epoch 10: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vvfuture_intent/cp_10.h5
-839/839 - 221s - loss: 0.8416 - rgb_o_loss: 0.2719 - seg_o_loss: 0.2132 - traj_o_loss: 0.2109 - rgb_o_accuracy: 0.8951 - seg_o_accuracy: 0.9198 - traj_o_accuracy: 0.9213 - val_loss: 2.7548 - val_rgb_o_loss: 0.8771 - val_seg_o_loss: 0.8584 - val_traj_o_loss: 0.8846 - val_rgb_o_accuracy: 0.7212 - val_seg_o_accuracy: 0.7240 - val_traj_o_accuracy: 0.7204 - lr: 1.4816e-05 - 221s/epoch - 264ms/step
-Epoch 11/50
-
-Epoch 11: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vvfuture_intent/cp_11.h5
-Restoring model weights from the end of the best epoch: 4.
-839/839 - 217s - loss: 0.8013 - rgb_o_loss: 0.2607 - seg_o_loss: 0.1996 - traj_o_loss: 0.1984 - rgb_o_accuracy: 0.8977 - seg_o_accuracy: 0.9273 - traj_o_accuracy: 0.9283 - val_loss: 2.9445 - val_rgb_o_loss: 0.9279 - val_seg_o_loss: 0.9205 - val_traj_o_loss: 0.9611 - val_rgb_o_accuracy: 0.7223 - val_seg_o_accuracy: 0.7130 - val_traj_o_accuracy: 0.7116 - lr: 1.3406e-05 - 217s/epoch - 258ms/step
-Epoch 11: early stopping
-Done. Total fit wall-time: 42.0 min

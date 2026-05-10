@@ -118,6 +118,7 @@ def render_record(rec, font, big_font):
         else:
             seg_thumbs.append(Image.new('RGB', (THUMB, THUMB), color=(80, 80, 80)))
 
+    visibility = rec.get('visibility', [True] * k)
     strip_w = THUMB * k + PAD * (k + 1)
     strip_h = THUMB + PAD * 2
     rgb_strip = Image.new('RGB', (strip_w, strip_h), color=(20, 20, 20))
@@ -129,6 +130,13 @@ def render_record(rec, font, big_font):
         ImageDraw.Draw(rgb_strip).text(
             (x + 4, PAD + 4), f't={rec["frame_idx"] - (k - 1 - i)}',
             fill='white', font=font)
+        if not visibility[i]:
+            for strip in (rgb_strip, seg_strip):
+                d = ImageDraw.Draw(strip)
+                d.rectangle([x, PAD, x + THUMB - 1, PAD + THUMB - 1],
+                            outline=(220, 30, 30), width=3)
+                d.text((x + 4, PAD + THUMB - 24), 'PLACEHOLDER',
+                       fill=(220, 30, 30), font=font)
 
     # 3) Compose vertically (full + RGB strip + seg strip).
     canvas_w = max(full_w, strip_w)
