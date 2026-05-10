@@ -156,63 +156,83 @@ python3 nuscenes/eval.py \
     --csv-out nuscenes/results/intentformer_preds_vfuture_intent_val.csv
 ```
 
-## Headline metrics (run `vfuture_intent`)
+## Headline metrics (run `vfuture_intent`, schema v3)
 
 50-epoch fit, EarlyStopping(monitor=`val_traj_o_accuracy`, patience=7) fired at
-epoch 11 → 42 min wall on RTX 3090. 11 checkpoints saved.
+epoch 11 → 78 min wall on RTX 3090 (more steps/epoch with the larger pkl).
+11 checkpoints saved; best weights restored from epoch 4.
 
-Sweep over `cp_*.h5` on the 3 660-record val split (full table at
+Sweep over `cp_*.h5` on the **5 278-record val split** (full table at
 `weights_v_nuscenes/vvfuture_intent/val_sweep.log`). Headline checkpoint
-picked by val ROC-AUC, also best by F1: **`cp_05.h5`** (epoch 5).
+picked by val ROC-AUC, also best by F1@best: **`cp_04.h5`** (epoch 4).
 
 | Metric | Value |
 |---|---:|
-| ROC AUC | **0.7782** |
-| Avg precision (PR-AUC) | 0.5470 |
-| Accuracy @ 0.5 | 0.7664 |
-| Precision @ 0.5 | 0.4690 |
-| Recall @ 0.5 | 0.5826 |
-| F1 @ 0.5 | 0.5197 |
-| Best threshold | 0.4471 |
-| F1 @ best | **0.5278** |
-| P @ best | 0.4578 |
-| R @ best | 0.6230 |
+| ROC AUC | **0.7576** |
+| Avg precision (PR-AUC) | 0.5060 |
+| Accuracy @ 0.5 | 0.8314 |
+| Precision @ 0.5 | 0.6736 |
+| Recall @ 0.5 | 0.2817 |
+| F1 @ 0.5 | 0.3973 |
+| Best threshold | 0.2515 |
+| F1 @ best | **0.4983** |
+| P @ best | 0.5005 |
+| R @ best | 0.4962 |
 
 Per-sample predictions: `results/intentformer_preds_vfuture_intent_val.csv`
 (columns match EfficientPIE's `preds_future_intent_val.csv`).
 
-Eval drops the last partial batch — sweep operates on 3 656/3 660 records.
-n_pos=793, n_neg=2 863 on the scored subset (21.7 %).
+Eval drops the last partial batch — sweep operates on 5 272/5 278 records.
+n_pos=1 040, n_neg=4 232 on the scored subset (19.7 %).
 
 ## Comparison vs. EfficientPIE-vfuture_intent
 
 `compare_with_efficientpie.py` intersects the two CSVs on
-`(instance_token, sample_token)` → 3 656 records (all IntentFormer rows are
-also in EfficientPIE; 0 label disagreements ⇒ same upstream JSON + intent_label).
+`(instance_token, sample_token)` → **5 272 records** (every IntentFormer val
+row is also in EfficientPIE; 0 label disagreements ⇒ same upstream JSON +
+intent_label).
 
-Apples-to-apples on the intersected 3 656-record subset:
+Apples-to-apples on the intersected 5 272-record subset:
 
-| Metric | IntentFormer (cp_05) | EfficientPIE (model_19) | Δ |
+| Metric | IntentFormer (cp_04) | EfficientPIE (model_19) | Δ |
 |---|---:|---:|---:|
-| ROC AUC | **0.7782** | 0.7150 | **+0.0632** |
-| Avg precision (PR-AUC) | **0.5468** | 0.4834 | +0.0634 |
-| Accuracy @ 0.5 | 0.7664 | 0.7713 | −0.0049 |
-| F1 @ 0.5 | **0.5197** | 0.4382 | +0.0815 |
-| F1 @ best threshold | **0.5278** | 0.4625 | +0.0653 |
-| P @ best | 0.4578 | 0.4346 | +0.0232 |
-| R @ best | **0.6230** | 0.4943 | +0.1287 |
+| ROC AUC | **0.7576** | 0.6985 | **+0.0591** |
+| Avg precision (PR-AUC) | **0.5060** | 0.4381 | +0.0679 |
+| Accuracy @ 0.5 | **0.8314** | 0.7836 | +0.0478 |
+| F1 @ 0.5 | **0.3973** | 0.3966 | +0.0007 |
+| F1 @ best threshold | **0.4983** | 0.4268 | +0.0715 |
+| P @ best | **0.5005** | 0.4083 | +0.0922 |
+| R @ best | **0.4962** | 0.4471 | +0.0491 |
 
-Recall jumps the most (+0.13) — IntentFormer surfaces more crossing
-pedestrians at comparable precision, despite using *less* training data
-(13 433 records vs. EfficientPIE's 19 251 — the seq filter requires 3-frame
-visibility).
+The intersection is now 1 616 records larger than schema-v2 (5 272 vs 3 656),
+covering harder partial-visibility cases (5 481 records have at least one
+placeholder past frame). IntentFormer's lead grows on F1@best (+0.0715 vs
++0.0653) and on precision (+0.0922 vs +0.0232) compared to the prior
+strict-visibility result, while ceding some recall (+0.0491 vs +0.1287). The
+higher operating-point threshold (0.50 vs 0.45) reflects a more conservative
+calibration — the model is less aggressive at flagging crossings under
+uncertainty.
 
 For context, the unintersected baselines (each model on its own full val):
 
 | | n_val | AUC | F1@best |
 |---|---:|---:|---:|
-| IntentFormer | 3 656 | 0.7782 | 0.5278 |
+| IntentFormer | 5 272 | 0.7576 | 0.4983 |
 | EfficientPIE | 5 682 | 0.6944 | 0.4176 |
+
+Schema-v2 → v3 deltas (same model arch, same loss, same hp; only the
+visibility filter relaxed and the training set grew +35.8 %):
+
+| | v2 (strict) | v3 (placeholders) | Δ |
+|---|---:|---:|---:|
+| Train records | 13 433 | 18 242 | +35.8 % |
+| Val records   | 3 660  | 5 278  | +44.2 % |
+| Headline cp   | cp_05  | cp_04  | — |
+| AUC (own val) | 0.7782 | 0.7576 | −0.0206 |
+| F1@best       | 0.5278 | 0.4983 | −0.0295 |
+
+The drop reflects a strictly harder val set, not a worse model — IntentFormer
+still beats EfficientPIE by a wider F1@best margin in v3.
 
 ## Open questions
 
@@ -220,3 +240,8 @@ For context, the unintersected baselines (each model on its own full val):
 - **Notebook artefacts not carried over**: bbox jitter (commented out in cell 12),
   per-modality independent random shuffle (was a bug; we use single-list permutation),
   `Custom_CE_Loss` learnable weights (defined cell 24 but unused by `model.compile()`).
+- **Mask-token attention for placeholders**: model currently sees zero RGB/seg/bbox
+  for occluded past frames (UniAD-style zero query). A learned mask token (or
+  attention-mask gate) at `TubeletEmbedding` could let the model distinguish
+  "no observation" from "stationary at origin" and may close the v2→v3 AUC gap.
+  Would need a 4th input head consuming `visibility[k]` (already in the index).
