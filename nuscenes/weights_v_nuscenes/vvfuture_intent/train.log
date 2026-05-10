@@ -50,3 +50,21 @@ Epoch 7/50
 Epoch 7: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vvfuture_intent/cp_07.h5
 2280/2280 - 418s - loss: 1.2552 - rgb_o_loss: 0.4148 - seg_o_loss: 0.3523 - traj_o_loss: 0.3515 - rgb_o_accuracy: 0.8225 - seg_o_accuracy: 0.8565 - traj_o_accuracy: 0.8567 - val_loss: 1.6638 - val_rgb_o_loss: 0.5362 - val_seg_o_loss: 0.4955 - val_traj_o_loss: 0.5013 - val_rgb_o_accuracy: 0.7745 - val_seg_o_accuracy: 0.7798 - val_traj_o_accuracy: 0.7773 - lr: 1.0000e-04 - 418s/epoch - 183ms/step
 Epoch 8/50
+
+Epoch 8: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vvfuture_intent/cp_08.h5
+2280/2280 - 421s - loss: 1.1770 - rgb_o_loss: 0.3893 - seg_o_loss: 0.3254 - traj_o_loss: 0.3265 - rgb_o_accuracy: 0.8345 - seg_o_accuracy: 0.8654 - traj_o_accuracy: 0.8669 - val_loss: 1.7117 - val_rgb_o_loss: 0.5699 - val_seg_o_loss: 0.5092 - val_traj_o_loss: 0.5075 - val_rgb_o_accuracy: 0.7794 - val_seg_o_accuracy: 0.7893 - val_traj_o_accuracy: 0.7914 - lr: 9.0484e-05 - 421s/epoch - 185ms/step
+Epoch 9/50
+
+Epoch 9: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vvfuture_intent/cp_09.h5
+2280/2280 - 417s - loss: 1.1049 - rgb_o_loss: 0.3658 - seg_o_loss: 0.3019 - traj_o_loss: 0.3020 - rgb_o_accuracy: 0.8480 - seg_o_accuracy: 0.8813 - traj_o_accuracy: 0.8802 - val_loss: 1.9031 - val_rgb_o_loss: 0.6295 - val_seg_o_loss: 0.5699 - val_traj_o_loss: 0.5758 - val_rgb_o_accuracy: 0.7458 - val_seg_o_accuracy: 0.7546 - val_traj_o_accuracy: 0.7547 - lr: 1.6375e-05 - 417s/epoch - 183ms/step
+Epoch 10/50
+
+Epoch 10: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vvfuture_intent/cp_10.h5
+2280/2280 - 417s - loss: 0.9054 - rgb_o_loss: 0.3051 - seg_o_loss: 0.2420 - traj_o_loss: 0.2400 - rgb_o_accuracy: 0.8752 - seg_o_accuracy: 0.9061 - traj_o_accuracy: 0.9070 - val_loss: 2.1502 - val_rgb_o_loss: 0.7326 - val_seg_o_loss: 0.6581 - val_traj_o_loss: 0.6494 - val_rgb_o_accuracy: 0.7331 - val_seg_o_accuracy: 0.7536 - val_traj_o_accuracy: 0.7551 - lr: 1.4816e-05 - 417s/epoch - 183ms/step
+Epoch 11/50
+
+Epoch 11: saving model to /root/IntentFormer/nuscenes/weights_v_nuscenes/vvfuture_intent/cp_11.h5
+Restoring model weights from the end of the best epoch: 4.
+2280/2280 - 416s - loss: 0.8676 - rgb_o_loss: 0.2938 - seg_o_loss: 0.2312 - traj_o_loss: 0.2276 - rgb_o_accuracy: 0.8820 - seg_o_accuracy: 0.9111 - traj_o_accuracy: 0.9106 - val_loss: 2.3438 - val_rgb_o_loss: 0.7909 - val_seg_o_loss: 0.7218 - val_traj_o_loss: 0.7220 - val_rgb_o_accuracy: 0.7265 - val_seg_o_accuracy: 0.7534 - val_traj_o_accuracy: 0.7549 - lr: 1.3406e-05 - 416s/epoch - 182ms/step
+Epoch 11: early stopping
+Done. Total fit wall-time: 77.7 min
